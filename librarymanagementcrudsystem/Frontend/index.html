@@ -1,0 +1,519 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Library Management System</title>
+
+    <link rel="stylesheet" href="./web.css">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <span class="logo-icon">📚</span>
+            <div>
+                <h2>LibraryHub</h2>
+                <small>Management System</small>
+            </div>
+        </div>
+
+        <div class="menu-heading">MAIN MENU</div>
+
+        <nav class="sidebar-menu">
+
+            <button class="menu-item active" data-view="dashboard">
+                <span>▦</span> Dashboard
+            </button>
+
+            <button class="menu-item" data-view="books">
+                <span>▤</span> All Books
+            </button>
+
+            <button class="menu-item" data-view="add">
+                <span>＋</span> Add Book
+            </button>
+
+            <button class="menu-item" data-view="find">
+                <span>⌕</span> Find Book
+            </button>
+
+            <button class="menu-item" data-view="update">
+                <span>✎</span> Update Book
+            </button>
+
+            <button class="menu-item" data-view="recycle">
+                <span>▣</span> Recycle Bin
+            </button>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>Library Administration</p>
+            <small>LibraryHub v1.0</small>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <h3 id="page-title">Dashboard</h3>
+                <p>Manage your library collection</p>
+            </div>
+
+            <div class="admin-info">
+                <div class="admin-avatar">A</div>
+                <div>
+                    <strong>Administrator</strong>
+                    <small>Library Admin</small>
+                </div>
+            </div>
+
+        </header>
+
+
+        <div class="content-area">
+
+            <!-- MESSAGE -->
+            <div id="message" class="message hidden"></div>
+
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="view active">
+
+                <div class="welcome-section">
+                    <h2>Welcome to LibraryHub</h2>
+                    <p>Manage your books and library inventory from one place.</p>
+                </div>
+
+                <div class="stats-container">
+
+                    <div class="stat-card">
+                        <div class="stat-icon blue">📚</div>
+                        <div>
+                            <p>Total Active Books</p>
+                            <h2 id="active-count">0</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon orange">🗑</div>
+                        <div>
+                            <p>Deleted Books</p>
+                            <h2 id="deleted-count">0</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">▤</div>
+                        <div>
+                            <p>Total Available Stock</p>
+                            <h2 id="stock-count">0</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon purple">₹</div>
+                        <div>
+                            <p>Inventory Value</p>
+                            <h2 id="inventory-value">₹0</h2>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h3>Recently Added Books</h3>
+                        <button class="text-button" data-view="books">
+                            View All
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Book Name</th>
+                                <th>ISBN</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                            </tr>
+                            </thead>
+
+                            <tbody id="recent-books">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    Loading books...
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ALL BOOKS -->
+            <section id="books" class="view">
+
+                <div class="section-header">
+                    <div>
+                        <h2>All Books</h2>
+                        <p>View and manage your active books.</p>
+                    </div>
+
+                    <button class="primary-button" data-view="add">
+                        + Add New Book
+                    </button>
+                </div>
+
+                <div class="panel">
+
+                    <div class="search-box">
+                        <input
+                                type="text"
+                                id="book-search"
+                                placeholder="Search by book name or ISBN..."
+                        >
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Book Name</th>
+                                <th>ISBN</th>
+                                <th>Price</th>
+                                <th>Available Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+
+                            <tbody id="books-table-body">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    Loading books...
+                                </td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ADD BOOK -->
+            <section id="add" class="view">
+
+                <div class="section-header">
+                    <div>
+                        <h2>Add New Book</h2>
+                        <p>Enter the details of the new book.</p>
+                    </div>
+                </div>
+
+                <div class="panel form-panel">
+
+                    <form id="book-form">
+
+                        <input type="hidden" id="book-id">
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label for="book-name">Book Name</label>
+                                <input
+                                        type="text"
+                                        id="book-name"
+                                        placeholder="Enter book name"
+                                        required
+                                        maxlength="150"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="isbn">ISBN Number</label>
+                                <input
+                                        type="number"
+                                        id="isbn"
+                                        placeholder="Enter ISBN number"
+                                        min="1"
+                                        max="2147483647"
+                                        step="1"
+                                        required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="price">Price (₹)</label>
+                                <input
+                                        type="number"
+                                        id="price"
+                                        placeholder="Enter book price"
+                                        min="0"
+                                        step="0.01"
+                                        required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stock">Available Stock</label>
+                                <input
+                                        type="number"
+                                        id="stock"
+                                        placeholder="Enter available stock"
+                                        min="0"
+                                        step="1"
+                                        required
+                                >
+                            </div>
+
+                        </div>
+
+                        <div class="form-actions">
+
+                            <button type="submit" id="submit-button"
+                                    class="primary-button">
+                                Add Book
+                            </button>
+
+                            <button type="button" id="cancel-button"
+                                    class="secondary-button">
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+
+            <!-- FIND BOOK -->
+            <section id="find" class="view">
+
+                <div class="section-header">
+                    <div>
+                        <h2>Find Book</h2>
+                        <p>Search for a book using its ID or ISBN.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+
+                    <div class="find-form">
+
+                        <div class="form-group">
+                            <label for="find-id">Search by Book ID</label>
+
+                            <div class="inline-search">
+                                <input
+                                        type="number"
+                                        id="find-id"
+                                        min="1"
+                                        placeholder="Enter Book ID"
+                                >
+
+                                <button id="find-id-button"
+                                        class="primary-button">
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="find-isbn">Search by ISBN</label>
+
+                            <div class="inline-search">
+                                <input
+                                        type="number"
+                                        id="find-isbn"
+                                        min="1"
+                                        max="2147483647"
+                                        placeholder="Enter ISBN number"
+                                >
+
+                                <button id="find-isbn-button"
+                                        class="primary-button">
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="find-result" class="result-container hidden"></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- UPDATE BOOK -->
+            <section id="update" class="view">
+
+                <div class="section-header">
+                    <div>
+                        <h2>Update Book</h2>
+                        <p>Find a book and modify its details.</p>
+                    </div>
+                </div>
+
+                <div class="panel form-panel">
+
+                    <div class="form-group">
+                        <label for="update-id">Enter Book ID</label>
+
+                        <div class="inline-search">
+                            <input
+                                    type="number"
+                                    id="update-id"
+                                    min="1"
+                                    placeholder="Enter Book ID"
+                            >
+
+                            <button id="load-update-button"
+                                    class="primary-button">
+                                Load Book
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <form id="update-form" class="hidden">
+
+                        <div class="form-grid">
+
+                            <div class="form-group">
+                                <label for="update-name">Book Name</label>
+                                <input type="text" id="update-name"
+                                       maxlength="150" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update-isbn">ISBN Number</label>
+                                <input type="number" id="update-isbn"
+                                       min="1" max="2147483647" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update-price">Price (₹)</label>
+                                <input type="number" id="update-price"
+                                       min="0" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="update-stock">Available Stock</label>
+                                <input type="number" id="update-stock"
+                                       min="0" step="1" required>
+                            </div>
+
+                        </div>
+
+                        <div class="form-actions">
+
+                            <button type="submit" class="primary-button">
+                                Update Book
+                            </button>
+
+                            <button type="button" id="update-cancel"
+                                    class="secondary-button">
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+
+            <!-- RECYCLE BIN -->
+            <section id="recycle" class="view">
+
+                <div class="section-header">
+                    <div>
+                        <h2>Recycle Bin</h2>
+                        <p>View and restore soft-deleted books.</p>
+                    </div>
+
+                    <button id="refresh-deleted"
+                            class="secondary-button">
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="panel">
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Book Name</th>
+                                <th>ISBN</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+
+                            <tbody id="deleted-table-body">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    Loading deleted books...
+                                </td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+<script src="./web.js"></script>
+
+</body>
+</html>
