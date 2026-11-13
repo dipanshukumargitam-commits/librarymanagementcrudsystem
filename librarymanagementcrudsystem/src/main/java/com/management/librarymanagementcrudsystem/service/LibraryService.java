@@ -1,6 +1,11 @@
 package com.management.librarymanagementcrudsystem.service;
 
 import com.management.librarymanagementcrudsystem.entity.Library;
+import com.management.librarymanagementcrudsystem.exception.BookNotFoundException;
+import com.management.librarymanagementcrudsystem.exception.DuplicateIsbnException;
+import com.management.librarymanagementcrudsystem.libraryDTO.LibraryRequestDTO;
+import com.management.librarymanagementcrudsystem.libraryDTO.LibraryResponseDTO;
+import com.management.librarymanagementcrudsystem.mapper.LibraryMapper;
 import com.management.librarymanagementcrudsystem.repository.LibraryRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,54 +19,89 @@ public class LibraryService {
         this.libraryRepository = libraryRepository;
     }
     //CREATE
-    public Library saveBooks(Library library){
-        library.setDeleted(false);
-        return libraryRepository.save(library);
+    public LibraryResponseDTO saveBooks(LibraryRequestDTO requestDTO){
+        boolean isbnExist = libraryRepository.findByIsbnNoAndDeletedFalse(requestDTO.getIsbnNo()).isPresent();
+        if(isbnExist){
+            throw  new DuplicateIsbnException("A Book with ISBN "+requestDTO.getIsbnNo() +" Already Exist.");
+        }
+        Library library = LibraryMapper.toEntity(requestDTO);
+        Library savedLibrary = libraryRepository.save(library);
+        return LibraryMapper.toResponseDTO(savedLibrary);
     }
+
+
 
     //READ
-    public Library getBooksById(Long id){
-       return
-               libraryRepository.findByIdAndDeletedFalse(id).orElseThrow(
-                       () -> new RuntimeException("Book Not found with this ID."));
+    public LibraryResponseDTO getBooksById(Long id){
+               Library library = libraryRepository.findByIdAndDeletedFalse(id).orElseThrow(
+                       () -> new BookNotFoundException("Book Not found with ID:  "+id));
+               return LibraryMapper.toResponseDTO(library);
     }
-    public Library getBooksByISBN(int isbnNo){
-        return
-                libraryRepository.findByIsbnNoAndDeletedFalse(isbnNo).orElseThrow(
+    public LibraryResponseDTO getBooksByISBN(int isbnNo){
+        Library library =libraryRepository.findByIsbnNoAndDeletedFalse(isbnNo).orElseThrow(
                         () -> new RuntimeException("No Books Found With this ISBN No."));
+        return LibraryMapper.toResponseDTO(library);
     }
 
-    public List<Library> getAllBooksWithDeletedIsFalse(){
-        return libraryRepository.findAllByDeletedFalse();
+    public List<LibraryResponseDTO> getAllBooksWithDeletedIsFalse(){
+         List<Library> libraries = libraryRepository.findAllByDeletedFalse();
+
+         return libraries.stream().map(LibraryMapper::toResponseDTO).toList();
     }
+
+
 
     //UPDATE
-    public Library updateLibrary(Long id, Library updateLibrary){
-        Library existingLibrary = getBooksById(id);
+    public LibraryResponseDTO updateLibrary(Long id, LibraryRequestDTO requestDTO){
 
-        existingLibrary.setName(updateLibrary.getName());
-        existingLibrary.setIsbnNo(updateLibrary.getIsbnNo());
-        existingLibrary.setPrice(updateLibrary.getPrice());
-        existingLibrary.setAvailableStock(updateLibrary.getAvailableStock());
+        Library existingLibrary = libraryRepository.findByIdAndDeletedFalse(id).orElseThrow(
+                () -> new BookNotFoundException("Book Not found with this ID."));
 
-        return libraryRepository.save(existingLibrary);
+        libraryRepository.findByIsbnNoAndDeletedFalse(requestDTO.getIsbnNo()).ifPresent(book -> {
+            if(!book.getId().equals(id)) {
+                throw new DuplicateIsbnException(
+                        "A Book With ISBN "+requestDTO.getIsbnNo()+ " Already Exists."
+                );
+            }
+        });
+
+        existingLibrary.setName(requestDTO.getName());
+        existingLibrary.setIsbnNo(requestDTO.getIsbnNo());
+        existingLibrary.setPrice(requestDTO.getPrice());
+        existingLibrary.setAvailableStock(requestDTO.getAvailableStock());
+        Library updateLibrary = libraryRepository.save(existingLibrary);
+        return LibraryMapper.toResponseDTO(updateLibrary);
     }
+
+
+
     //SOFT DELETE
-    public Library deleteBooksById(Long id){
+    public LibraryResponseDTO deleteBooksById(Long id){
         Library library = libraryRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Book not found"));
         library.setDeleted(true);
-        return libraryRepository.save(library);
-    }
-    //Get deleted Books
-    public List<Library> getDeletedBooks(){
-        return libraryRepository.findAllByDeletedTrue();
+        Library savedLibrary = libraryRepository.save(library);
+        return LibraryMapper.toResponseDTO(savedLibrary);
     }
 
+
+
+    //Get deleted Books
+    public List<LibraryResponseDTO> getDeletedBooks(){
+
+        List<Library> deletedBoooks = libraryRepository.findAllByDeletedTrue();
+        return deletedBoooks.stream().map(LibraryMapper::toResponseDTO).toList();
+
+    }
+
+
+
     //Restore Deleted Books
-    public Library restoreDeleteBooks(Long id){
+    public LibraryResponseDTO restoreDeleteBooks(Long id){
         Library library = libraryRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found.."));
         library.setDeleted(false);
-        return libraryRepository.save(library);
+        Library savedRestoredBooks = libraryRepository.save(library);
+        return LibraryMapper.toResponseDTO(savedRestoredBooks);
     }
+
 }

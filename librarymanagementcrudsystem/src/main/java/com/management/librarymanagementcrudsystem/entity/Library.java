@@ -14,7 +14,7 @@ public class Library {
     private float price;
     private int availableStock;
     @Column(nullable = false)
-    private Boolean deleted = false;
+    private boolean deleted = false;
 
     public Library(){
 
